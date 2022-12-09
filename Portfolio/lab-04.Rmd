@@ -1,0 +1,177 @@
+---
+title: "Lab 04 - La Quinta is Spanish for next to Denny's, Pt. 1"
+author: "Liam Durkin"
+date: "17 October 2022"
+output: html_document
+---
+
+### Load packages and data
+
+```{r load-packages, message = FALSE}
+library(tidyverse)
+library(dsbox) 
+```
+
+```{r load-data, message = FALSE}
+states <- read_csv("data/states.csv")
+```
+
+### Exercise 1
+
+Load in the Denny's and La Quinta Data
+
+```{r}
+df_dennys <- dennys
+df_laquinta <- laquinta
+```
+
+Reading the rows and columns of Denny's
+
+```{r}
+nrow(df_dennys)
+ncol(df_dennys)
+```
+
+Each row in the Denny's dataset represents a Denny's location.
+The variables are address, city, state, zip, longitute, and latitude.
+
+### Exercise 2
+
+Reading the rows and columns of La Quinta
+
+```{r}
+nrow(df_laquinta)
+ncol(df_laquinta)
+```
+
+Each row in the Denny's dataset represents a La Quinta location.
+The variables are address, city, state, zip, longitute, and latitude.
+
+### Exercise 3
+
+There are La Quinta's outside of the US in the countries of Mexico, Canada, and Honduras
+
+There are Denny's outside of the US in the countries of Mexico, Canada, Puerto Rico, and Indonesia.
+
+...
+
+### Exercise 4
+
+If the State is not one of the 50 US states then we would know that it is not in the US.
+
+The longitude and latitude location could be check to see if its within the boundaries of the US.
+
+The zip code location could be checked.
+
+...
+
+### Exercise 5
+
+```{r}
+denny_non_us <- df_dennys %>% filter(!(state %in% states$abbreviation))
+```
+
+The Denny's listed in this data set do not have a location outside of the US.
+
+...
+
+### Exercise 6
+
+```{r}
+df_dennys <- df_dennys %>% mutate(country = "United States")
+```
+
+...
+
+### Exercise 7
+
+```{r}
+laquinta_non_us <- df_laquinta %>% filter(!(state %in% states$abbreviation))
+```
+
+There are 14 laquinta locations outside of the US.
+They are in Mexico, Colombia, and Canada.
+...
+
+### Exercise 8
+
+```{r}
+df_laquinta <- df_laquinta %>% 
+  mutate(country = case_when(
+    state %in% state.abb ~ "United States",
+    state %in% c("ON", "BC") ~ "Canada",
+    state == "ANT" ~ "Colombia",
+    state %in% c("AG", "QR", "CH", "NL", "VE", "PU", "SL", "FM") ~ "Mexico"
+))
+```
+
+...
+
+### Exercise 9
+
+```{r}
+dennys_num <- df_dennys %>% count(state) %>% inner_join(states, by = c("state" = "abbreviation"))
+```
+
+California has the most Denny's locations, and Delaware has the least amount of Denny's locations.
+
+```{r}
+laquinta_num <- df_laquinta %>% count(state) %>% inner_join(states, by = c("state" = "abbreviation"))
+```
+
+Texas has the most amount of La Quinta's, and Maine has the least amount of La Quinta's.
+
+...
+
+### Exercise 10
+
+```{r}
+df_dennys <- df_dennys %>%
+  mutate(establishment = "Denny's")
+df_laquinta <- df_laquinta %>%
+  mutate(establishment = "La Quinta")
+
+dn_lq <- bind_rows(df_dennys, df_laquinta)
+
+dn_lq %>% ggplot(mapping = aes(x = longitude, y = latitude, color = establishment)) + geom_point()
+```
+
+...
+
+### Exercise 11
+
+```{r}
+df_dennys <- df_dennys %>%
+  mutate(establishment = "Denny's")
+df_laquinta <- df_laquinta %>%
+  mutate(establishment = "La Quinta")
+
+dn_lq <- bind_rows(df_dennys, df_laquinta) %>%
+<<<<<<< HEAD
+  filter(state == "OK")
+=======
+  filter(state == "NC")
+>>>>>>> c22f7093988991c809b608d62f8275752cde21b0
+
+dn_lq %>% ggplot(mapping = aes(x = longitude, y = latitude, color = establishment)) + geom_point()
+```
+
+...
+
+### Exercise 12
+
+```{r}
+df_dennys <- df_dennys %>%
+  mutate(establishment = "Denny's")
+df_laquinta <- df_laquinta %>%
+  mutate(establishment = "La Quinta")
+
+dn_lq <- bind_rows(df_dennys, df_laquinta) %>%
+  filter(state == "TX")
+
+dn_lq %>% ggplot(mapping = aes(x = longitude, y = latitude, color = establishment)) + geom_point()
+```
+
+...
+
+Add exercise headings as needed.

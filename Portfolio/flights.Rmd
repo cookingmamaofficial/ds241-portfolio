@@ -1,0 +1,57 @@
+---
+title: "NYC Flights"
+author: "Liam Durkin"
+date: "2022-09-12"
+output: html_notebook
+---
+
+
+```{r}
+install.packages("nycflights13")
+install.packages("here")
+install.packages("janitor")
+```
+```{r}
+library("nycflights13")
+library("here")
+library("janitor")
+library("tidyverse")
+
+```
+
+```{r}
+
+df1 = flights
+
+df6 = df1 %>%
+  filter(dest == "MIA")
+
+airports = c("MIA",
+  "ATL",
+  "LAX",
+  "SFO",
+  "ORD",
+  "SAN")
+
+df7 = df1 %>%
+  filter(dest %in% airports)
+
+df7 %>% ggplot(aes(x = month, fill = dest)) + geom_bar() + facet_wrap(~dest)
+
+```
+Observing the graph above, it seems as though there is an average of 1000 flights going to Miami per month.  The peak month of travel seems to be in December.  The least amount of flights is in February, but that is most likely because February is the shortest month of the year.  I wonder what a Flights / day graph would look like as well.
+
+Analyzing the graph we note:
+
+* December has the most flights, perhaps due to holiday.
+* February is low, perhaps due to fewer days in February.
+* Flight numbers seem to correlate with days in the
+
+Observation from above graph:
+* San Diego is much smaller than the others.
+* MIA is _unusually_ flat.
+* ORD is summer intensive (more traffic over summer)
+* ORD, LAX, SFO patterns similar: low in winter, high in summer
+
+
+

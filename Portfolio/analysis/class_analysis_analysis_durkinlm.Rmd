@@ -1,0 +1,38 @@
+---
+title: "Class Analysis"
+output: html_notebook
+---
+
+```{r}
+
+library(tidyverse)
+library(here)
+library(janitor)
+
+```
+
+The idea of this analysis is to predict the Spring 2022 enrollment for the MA132: Calculus II class.  Previous years data will be used to predict this outcome.  Some things to note:
+- MA132 has the course_id = 8733; MA131 has course_id = 8732
+- term is 4 + last 2 digits of year + 2 (Spring), 6 (Summer), 9 (Fall); ex. 4172 = Spring 2017 class
+- we mostly care about the lecture components (component = LEC)
+
+
+Importing the Class Data:
+```{r}
+class_data <- read_csv(here("data_raw", "CU_ACAD_DEPT_WHEN_OFF_ENRL_22740.csv"), skip = 1) %>% clean_names()
+```
+
+Organizing the data:
+```{r}
+ma132_data <- class_data %>% filter(course_id == "8733", component == "LEC")
+
+```
+
+
+Visualizing the data:
+```{r}
+
+ma132_group <- ma132_data %>% group_by(term) %>% summarise(tot_trm_enrl = sum(tot_enrl))
+ggplot(ma132_group, aes(term,tot_trm_enrl)) + geom_point()
+
+```

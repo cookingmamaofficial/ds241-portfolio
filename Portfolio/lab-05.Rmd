@@ -1,0 +1,161 @@
+---
+title: "Lab 04 - La Quinta is Spanish for next to Denny's, Pt. 2"
+author: "Mahb 2"
+date: "10/19/2022"
+output: github_document
+---
+
+### Load packages and data
+
+```{r load-packages, message = FALSE}
+library(tidyverse) 
+library(dsbox) 
+```
+
+```{r load-data, message = FALSE}
+states <- read_csv("data/states.csv")
+```
+
+### Exercise 1 - Denny's in AK
+
+```{r}
+
+dn_ak <- dennys %>% filter(state == "AK")
+nrow(dn_ak)
+
+```
+
+### Exercise 2 - La Quinta in AK
+
+```{r}
+
+lq_ak <- laquinta %>% filter(state == "AK") 
+nrow(lq_ak)
+
+```
+
+### Exercise 3 - Join Denny's and La Quinta in AK
+
+```{r}
+
+dn_lq_ak <- full_join(dn_ak, lq_ak, by = "state") 
+
+```
+
+...
+
+### Exercise 4 - Read AK Dataframe
+
+```{r}
+dn_lq_ak
+```
+
+There are 6 observations with 11 variables.
+The 11 variables are address (x & y), city(x & y), zip(x & y), longitude(x & y), latitude(x & y), and state.
+The x in the variable name is the data from the 'x' data frame which is associated with the Denny's, and 'y' is associated with La Quinta
+
+...
+
+### Exercise - Import the Haversine function
+
+```{r}
+haversine <- function(long1, lat1, long2, lat2, round = 3) {
+  # convert to radians
+  long1 = long1 * pi / 180
+  lat1  = lat1  * pi / 180
+  long2 = long2 * pi / 180
+  lat2  = lat2  * pi / 180
+  R = 6371 # Earth mean radius in km
+  a = sin((lat2 - lat1)/2)^2 + cos(lat1) * cos(lat2) * sin((long2 - long1)/2)^2
+  d = R * 2 * asin(sqrt(a))
+  return( round(d,round) ) # distance in km
+}
+
+```
+
+...
+
+### Exercise 6 - Calculate the Distances
+
+```{r}
+
+dn_lq_ak <- dn_lq_ak %>% mutate(distance_km = haversine(longitude.x, latitude.x, longitude.y, latitude.y))
+
+```
+
+...
+
+### Exercise 7
+
+```{r}
+dn_lq_ak_mindist <- dn_lq_ak %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance_km))
+```
+
+...
+
+### Exercise 8
+
+```{r}
+dn_lq_ak %>% ggplot(aes(x=address.x, y=distance_km)) + geom_point()
+```
+
+```{r}
+dn_lq_ak_mindist %>% ggplot(aes(x=address.x, y=closest)) + geom_point()
+```
+
+...
+
+### Exercise 9
+
+```{r}
+dn_nc <- dennys %>% filter(state == "NC")
+lq_nc <- laquinta %>% filter(state == "NC") 
+dn_lq_nc <- full_join(dn_nc, lq_nc, by = "state") 
+dn_lq_nc <- dn_lq_nc %>% mutate(distance_km = haversine(longitude.x, latitude.x, longitude.y, latitude.y))
+dn_lq_nc_mindist <- dn_lq_nc %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance_km))
+dn_lq_nc %>% ggplot(aes(x=address.x, y=distance_km)) + geom_point()
+dn_lq_nc_mindist %>% ggplot(aes(x=address.x, y=closest)) + geom_point()
+```
+
+...
+
+### Exercise 10
+
+```{r}
+dn_tx <- dennys %>% filter(state == "TX")
+lq_tx <- laquinta %>% filter(state == "TX") 
+dn_lq_tx <- full_join(dn_tx, lq_tx, by = "state") 
+dn_lq_tx <- dn_lq_tx %>% mutate(distance_km = haversine(longitude.x, latitude.x, longitude.y, latitude.y))
+dn_lq_tx_mindist <- dn_lq_tx %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance_km))
+dn_lq_tx %>% ggplot(aes(x=address.x, y=distance_km)) + geom_point()
+dn_lq_tx_mindist %>% ggplot(aes(x=address.x, y=closest)) + geom_point()
+```
+
+...
+
+### Exercise 11
+
+```{r}
+dn_ca <- dennys %>% filter(state == "CA")
+lq_ca <- laquinta %>% filter(state == "CA") 
+dn_lq_ca <- full_join(dn_ca, lq_ca, by = "state") 
+dn_lq_ca <- dn_lq_ca %>% mutate(distance_km = haversine(longitude.x, latitude.x, longitude.y, latitude.y))
+dn_lq_ca_mindist <- dn_lq_ca %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance_km))
+dn_lq_ca %>% ggplot(aes(x=address.x, y=distance_km)) + geom_point()
+dn_lq_ca_mindist %>% ggplot(aes(x=address.x, y=closest)) + geom_point()
+dn_lq_ca_mindist %>% filter(closest <= 1)
+```
+
+...
+
+### Exercise 12
+
+Kind of ...

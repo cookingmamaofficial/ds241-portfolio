@@ -1,0 +1,72 @@
+---
+title: "Restaurant Analysis"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggplot2)
+library(dsbox)
+```
+
+```{r}
+df1 <- read_csv(here("data", "FastFoodRestaurants.csv")) %>% clean_names()
+quinta <- laquinta
+states <- read_csv(here("data","states.csv")) %>% clean_names()
+```
+
+```{r}
+mcdonalds_nc <- df1 %>% filter(province=="NC" & name == "McDonald's")
+mcdonalds_nc_random <- mcdonalds_nc %>% slice_sample(n=28) %>% mutate(state=province, zip=postal_code) %>% select(1,2,11,12,6,5)
+quinta_nc <- quinta %>% filter(state=="NC")
+```
+
+```{r}
+haversine <- function(long1, lat1, long2, lat2, round = 3) {
+  # convert to radians
+  long1 = long1 * pi / 180
+  lat1  = lat1  * pi / 180
+  long2 = long2 * pi / 180
+  lat2  = lat2  * pi / 180
+  R = 6371 # Earth mean radius in km
+  a = sin((lat2 - lat1)/2)^2 + cos(lat1) * cos(lat2) * sin((long2 - long1)/2)^2
+  d = R * 2 * asin(sqrt(a))
+  return( round(d,round) ) # distance in km
+}
+```
+
+
+```{r}
+dn_nc <- dennys %>% filter(state == "NC")
+lq_nc <- laquinta %>% filter(state == "NC") 
+dn_lq_nc <- full_join(dn_nc, lq_nc, by = "state") 
+dn_lq_nc <- dn_lq_nc %>% mutate(distance_km = haversine(longitude.x, latitude.x, longitude.y, latitude.y))
+dn_lq_nc_mindist <- dn_lq_nc %>%
+  group_by(address.y) %>%
+  summarise(closest = min(distance_km))
+
+# IN ORDER TO DO THIS, HAD TO MODIFY TO GROUP BY THE LA QUINTA ADDRESS 
+```
+
+
+```{r}
+mc1 <- mcdonalds_nc_random %>% filter(state == "NC")
+mc2 <- full_join(mc1, lq_nc, by = "state") 
+mc2 <- mc2 %>% mutate(distance_km = haversine(longitude.x, latitude.x, longitude.y, latitude.y))
+mc_lq_nc_mindist <- mc2 %>%
+  group_by(address.y) %>%
+  summarise(closest = min(distance_km))
+```
+
+
+```{r}
+dn_lq_nc_mindist <-dn_lq_nc_mindist %>% mutate(comparision = "Dennys")
+mc_lq_nc_mindist <- mc_lq_nc_mindist %>% mutate(comparision = "McDonalds")
+midist_all = rbind(dn_lq_nc_mindist,mc_lq_nc_mindist)
+```
+
+```{r}
+midist_all %>% ggplot(aes(address.y, fill = comparision)) + geom_bar(aes(weight = closest))+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + xlab("La Quinta Address") + ylab("Minimum Distance (miles) to Closest Restauraunt") + ggtitle("Denny's and McDonalds Distance from La Quinta in NC") + guides(fill=guide_legend(title="Restauraunt"))  + scale_fill_manual(values=c("darkslateblue","deeppink2"))
+```
